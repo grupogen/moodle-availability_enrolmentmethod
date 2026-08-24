@@ -40,3 +40,22 @@ Because of that, availability_enrolmentmethod can't be used to hide activities /
 ## License
 
 Licensed under the [GNU GPL License](http://www.gnu.org/copyleft/gpl.html).
+
+## Fork GEN
+
+Forkeado para
+- Adicionar o composer.json
+
+- Adicinar tradução dos termos pt_br
+
+- Criar texto de descrição específico para os métodos de inscrição: manual e magento
+```
+// Enrolment methods used to grant access to purchased content (manual and Magento)
+// get a dedicated message instead of exposing the technical enrolment method name.
+$purchaseenroltypes = ['manual', 'magento'];
+$instances = $manager->get_enrolment_instances(true);
+$enroltype = $instances[$this->enrolmentmethodid]->enrol ?? null;
+if (!$not && in_array($enroltype, $purchaseenroltypes, true)) {
+    return get_string('requires_purchase', 'availability_enrolmentmethod');
+}
+```

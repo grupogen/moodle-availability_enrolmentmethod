@@ -22,12 +22,12 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['description'] = 'Allow only students who belong to a specified enrolment method.';
-$string['missing'] = '(Missing enrolment method)';
-$string['pluginname'] = 'Restriction by enrolment method';
-$string['error_selectenrolmentmethod'] = 'You must select a enrolment method.';
-$string['requires_enrolmentmethod'] = 'You belong to <strong>{$a}</strong>';
-$string['requires_notenrolmentmethod'] = 'You do not belong to <strong>{$a}</strong>';
-$string['requires_purchase'] = 'You need to have gain this.';
-$string['title'] = 'Enrolment method';
-$string['privacy:metadata'] = 'The Restriction by enrolment method plugin does not store any personal data.';
+$string['description'] = 'Permitir apenas estudantes com um determinado método de inscrição.';
+$string['missing'] = '(Faltando o método de inscrição)';
+$string['pluginname'] = 'Restrição por método de inscrição';
+$string['error_selectenrolmentmethod'] = 'Você deve selecionar um método de inscrição.';
+$string['requires_enrolmentmethod'] = 'Você pertence à <strong>{$a}</strong>';
+$string['requires_notenrolmentmethod'] = 'Você não pertence à <strong>{$a}</strong>';
+$string['requires_purchase'] = 'Você adquirir esse <strong>conteúdo</strong>.';
+$string['title'] = 'Método de inscrição';
+$string['privacy:metadata'] = 'O plugin de restrição por método de inscrição não guarda nenhum dado pessoal.';

@@ -126,8 +126,16 @@ class condition extends \core_availability\condition {
                 // Not safe to call format_string here; use the special function to call it later.
                 $name = self::description_format_string($enrolmentmethodnames[$this->enrolmentmethodid]);
             }
-        }
 
+            // Enrolment methods used to grant access to purchased content (manual and Magento)
+            // get a dedicated message instead of exposing the technical enrolment method name.
+            $purchaseenroltypes = ['manual', 'magento'];
+            $instances = $manager->get_enrolment_instances(true);
+            $enroltype = $instances[$this->enrolmentmethodid]->enrol ?? null;
+            if (!$not && in_array($enroltype, $purchaseenroltypes, true)) {
+                return get_string('requires_purchase', 'availability_enrolmentmethod');
+            }
+        }
         return get_string($not ? 'requires_notenrolmentmethod' : 'requires_enrolmentmethod',
                 'availability_enrolmentmethod', $name);
     }

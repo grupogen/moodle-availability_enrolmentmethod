@@ -1,0 +1,17 @@
+{
+    "name": "grupogen/availability_enrolmentmethod",
+    "type": "moodle-availability",
+    "authors": [
+      {
+        "name": "Igor Figueiredo",
+        "email": "igor.figueiredo@grupogen.com.br"
+      }
+    ],
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "require-dev": {},
+    "extra": {
+        "installer-name": "enrolmentmethod"
+    }
+}
