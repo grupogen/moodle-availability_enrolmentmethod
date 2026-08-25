@@ -76,6 +76,20 @@ class condition extends \core_availability\condition {
         return $result;
     }
     /**
+     * Whether a user_enrolments record counts as currently active: status active and within
+     * its timestart/timeend window (mirrors is_enrolled(..., onlyactive: true) in enrollib.php).
+     *
+     * @param stdClass $userenrolment Record from the user_enrolments table
+     * @return bool
+     */
+    private function is_userenrolment_active(stdClass $userenrolment): bool {
+        $now = time();
+        return (int) $userenrolment->status === ENROL_USER_ACTIVE
+                && (int) $userenrolment->timestart < $now
+                && ((int) $userenrolment->timeend === 0 || (int) $userenrolment->timeend > $now);
+    }
+
+    /**
      * Check if the item is available with this restriction.
      *
      * @param bool                    $not
@@ -89,12 +103,16 @@ class condition extends \core_availability\condition {
         global $PAGE;
         $course = $info->get_course();
 
-        $allow = true;
         $manager = new course_enrolment_manager($PAGE, $course);
         $userenrolments = $manager->get_user_enrolments($userid);
-        $userenrolids = array_column($userenrolments , 'enrolid');
-        if (!in_array($this->enrolmentmethodid, $userenrolids)) {
-            $allow = false;
+
+        $allow = false;
+        foreach ($userenrolments as $userenrolment) {
+            if ((int) $userenrolment->enrolid === $this->enrolmentmethodid
+                    && $this->is_userenrolment_active($userenrolment)) {
+                $allow = true;
+                break;
+            }
         }
         if ($not) {
             $allow = !$allow;
@@ -225,7 +243,8 @@ class condition extends \core_availability\condition {
             $allow = false;
 
             foreach ($userenrolments as $userenrolment) {
-                if ($this->enrolmentmethodid === (int) $userenrolment->enrolid) {
+                if ($this->enrolmentmethodid === (int) $userenrolment->enrolid
+                        && $this->is_userenrolment_active($userenrolment)) {
                     $allow = true;
                     break;
                 }

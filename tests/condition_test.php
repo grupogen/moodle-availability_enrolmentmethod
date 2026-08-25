@@ -127,6 +127,79 @@ class condition_test extends advanced_testcase {
     }
 
     /**
+     * Tests that a suspended enrolment does not satisfy the condition, even though the user
+     * still has a user_enrolments record for that enrolment method.
+     *
+     * @covers \availability_enrolmentmethod\condition::is_available()
+     * @throws coding_exception
+     */
+    public function test_usage_suspended_enrolment() {
+        global $CFG, $PAGE;
+        $this->resetAfterTest();
+        $CFG->enableavailability = true;
+        $generator = self::getDataGenerator();
+
+        // Generate course and user enrolled with manual enrolment plugin.
+        $course = $generator->create_course();
+        $user = $generator->create_user();
+        $generator->enrol_user($user->id, $course->id, 'student', 'manual');
+
+        $manager = new course_enrolment_manager($PAGE, $course);
+        $userenrolments = $manager->get_user_enrolments($user->id);
+        $manualenrolinstance = reset($userenrolments)->enrolmentinstance;
+
+        $manualplugin = enrol_get_plugin('manual');
+        $manualplugin->update_status($manualenrolinstance, ENROL_INSTANCE_ENABLED);
+
+        // Suspend the user's enrolment on this method.
+        $manualplugin->update_user_enrol($manualenrolinstance, $user->id, ENROL_USER_SUSPENDED);
+
+        $info = new \core_availability\mock_info($course, $user->id);
+        $cond = new condition((object) array('id' => (int) $manualenrolinstance->id));
+
+        // A suspended enrolment must not count as "belongs to" the enrolment method.
+        $this->assertFalse($cond->is_available(false, $info, true, $user->id));
+        $this->assertTrue($cond->is_available(true, $info, true, $user->id));
+    }
+
+    /**
+     * Tests that an enrolment past its timeend does not satisfy the condition, even though its
+     * status is still active (Moodle does not flip status automatically when time expires).
+     *
+     * @covers \availability_enrolmentmethod\condition::is_available()
+     * @throws coding_exception
+     */
+    public function test_usage_expired_enrolment() {
+        global $CFG, $PAGE;
+        $this->resetAfterTest();
+        $CFG->enableavailability = true;
+        $generator = self::getDataGenerator();
+
+        // Generate course and user enrolled with manual enrolment plugin.
+        $course = $generator->create_course();
+        $user = $generator->create_user();
+        $generator->enrol_user($user->id, $course->id, 'student', 'manual');
+
+        $manager = new course_enrolment_manager($PAGE, $course);
+        $userenrolments = $manager->get_user_enrolments($user->id);
+        $manualenrolinstance = reset($userenrolments)->enrolmentinstance;
+
+        $manualplugin = enrol_get_plugin('manual');
+        $manualplugin->update_status($manualenrolinstance, ENROL_INSTANCE_ENABLED);
+
+        // Status stays active, but the timestart/timeend window is entirely in the past.
+        $manualplugin->update_user_enrol($manualenrolinstance, $user->id, ENROL_USER_ACTIVE,
+                time() - (2 * DAYSECS), time() - DAYSECS);
+
+        $info = new \core_availability\mock_info($course, $user->id);
+        $cond = new condition((object) array('id' => (int) $manualenrolinstance->id));
+
+        // An expired enrolment must not count as "belongs to" the enrolment method.
+        $this->assertFalse($cond->is_available(false, $info, true, $user->id));
+        $this->assertTrue($cond->is_available(true, $info, true, $user->id));
+    }
+
+    /**
      * Tests the constructor including error conditions. Also tests the
      * string conversion feature (intended for debugging only).
      *
